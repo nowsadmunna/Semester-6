@@ -1,0 +1,83 @@
+version: '3.8'
+services:
+  user-service:
+    build:
+      context: ./MicroUserService
+    container_name: user-service
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo-user:27017/userdb
+    networks:
+      - smart-library
+    ports:
+      - "8081:8081"
+  
+  book-service:
+    build: 
+      context: ./MicroBookService
+    container_name: book-service
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo-book:27017/bookdb
+    networks:
+      - smart-library
+    ports:
+      - "8082:8082"
+  
+  loan-service:
+    build: 
+      context: ./MicroLoanService
+    container_name: loan-service
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo-loan:27017/loandb
+    networks:
+      - smart-library
+    ports:
+      - "8083:8083"
+  
+  mongo-user:
+    image: mongo
+    container_name: mongo-user
+    networks:
+      - smart-library
+    volumes:
+      - mongo-user-data:/data/db
+  
+  mongo-book:
+    image: mongo
+    container_name: mongo-book
+    networks:
+      - smart-library
+    volumes:
+      - mongo-book-data:/data/db
+  
+  mongo-loan:
+    image: mongo
+    container_name: mongo-loan
+    networks:
+      - smart-library
+    volumes:
+      - mongo-loan-data:/data/db
+  
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - smart-library
+    depends_on:
+      - user-service
+      - book-service
+      - loan-service
+
+networks:
+  smart-library:
+    driver: bridge
+
+volumes:
+  mongo-user-data:
+  mongo-book-data:
+  mongo-loan-data:

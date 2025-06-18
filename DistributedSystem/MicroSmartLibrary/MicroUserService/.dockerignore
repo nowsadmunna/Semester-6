@@ -1,0 +1,5 @@
+target/*.original
+target/generated-sources/
+target/test-classes/
+*.log
+*.md
