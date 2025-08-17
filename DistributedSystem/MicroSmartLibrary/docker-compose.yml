@@ -1,66 +1,171 @@
+# version: '3.8'
+# services:
+#   user-service:
+#     build:
+#       context: ./MicroUserService
+#     container_name: user-service
+#     environment:
+#       - SPRING_DATA_MONGODB_URI=mongodb://mongo-user:27017/userdb
+#     networks:
+#       - smart-library
+#     ports:
+#       - "8081:8081"
+  
+#   book-service:
+#     build: 
+#       context: ./MicroBookService
+#     container_name: book-service
+#     environment:
+#       - SPRING_DATA_MONGODB_URI=mongodb://mongo-book:27017/bookdb
+#     networks:
+#       - smart-library
+#     ports:
+#       - "8082:8082"
+  
+#   loan-service:
+#     build: 
+#       context: ./MicroLoanService
+#     container_name: loan-service
+#     environment:
+#       - SPRING_DATA_MONGODB_URI=mongodb://mongo-loan:27017/loandb
+#     networks:
+#       - smart-library
+#     ports:
+#       - "8083:8083"
+  
+#   mongo-user:
+#     image: mongo
+#     container_name: mongo-user
+#     networks:
+#       - smart-library
+#     volumes:
+#       - mongo-user-data:/data/db
+  
+#   mongo-book:
+#     image: mongo
+#     container_name: mongo-book
+#     networks:
+#       - smart-library
+#     volumes:
+#       - mongo-book-data:/data/db
+  
+#   mongo-loan:
+#     image: mongo
+#     container_name: mongo-loan
+#     networks:
+#       - smart-library
+#     volumes:
+#       - mongo-loan-data:/data/db
+  
+#   nginx:
+#     build:
+#       context: ./nginx
+#     container_name: nginx
+#     ports:
+#       - "80:80"
+#       - "443:443"
+#     volumes:
+#       - ./nginx/ssl:/etc/nginx/ssl
+#     networks:
+#       - smart-library
+#     depends_on:
+#       - user-service
+#       - book-service
+#       - loan-service
+
+# networks:
+#   smart-library:
+#     driver: bridge
+
+# volumes:
+#   mongo-user-data:
+#   mongo-book-data:
+#   mongo-loan-data:
+
 version: '3.8'
+
 services:
   user-service:
-    build:
-      context: ./MicroUserService
-    container_name: user-service
+    image: mdnowsadhossenmunna/user-service:v1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongo-user:27017/userdb
     networks:
       - smart-library
     ports:
       - "8081:8081"
-  
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      # placement:
+      #   constraints:
+      #     - node.hostname==RakinUbuntu
+
+
   book-service:
-    build: 
-      context: ./MicroBookService
-    container_name: book-service
+    image: mdnowsadhossenmunna/book-service:v1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongo-book:27017/bookdb
     networks:
       - smart-library
     ports:
       - "8082:8082"
-  
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
   loan-service:
-    build: 
-      context: ./MicroLoanService
-    container_name: loan-service
+    image: mdnowsadhossenmunna/loan-service:v1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongo-loan:27017/loandb
     networks:
       - smart-library
     ports:
       - "8083:8083"
-  
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
   mongo-user:
-    image: mongo
-    container_name: mongo-user
+    image: mongo:latest
     networks:
       - smart-library
     volumes:
       - mongo-user-data:/data/db
-  
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
   mongo-book:
-    image: mongo
-    container_name: mongo-book
+    image: mongo:latest
     networks:
       - smart-library
     volumes:
       - mongo-book-data:/data/db
-  
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
   mongo-loan:
-    image: mongo
-    container_name: mongo-loan
+    image: mongo:latest
     networks:
       - smart-library
     volumes:
       - mongo-loan-data:/data/db
-  
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
   nginx:
-    build:
-      context: ./nginx
-    container_name: nginx
+    image: mdnowsadhossenmunna/nginx-service:v1
     ports:
       - "80:80"
       - "443:443"
@@ -72,10 +177,17 @@ services:
       - user-service
       - book-service
       - loan-service
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
 
 networks:
   smart-library:
-    driver: bridge
+    driver: overlay
 
 volumes:
   mongo-user-data:

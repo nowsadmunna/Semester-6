@@ -52,5 +52,6 @@ public class BookController {
         List<Map<String, Object>> result = bookService.getMostBorrowedBooks();
         return ResponseEntity.ok(result);
     }
+    @GetMapping("/nonactive")
 
 }

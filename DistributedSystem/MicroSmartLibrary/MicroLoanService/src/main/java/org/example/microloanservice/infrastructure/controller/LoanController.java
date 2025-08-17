@@ -18,6 +18,11 @@ public class LoanController {
         this.loanUseCase = loanUseCase;
     }
 
+    @GetMapping("/actuator/healthcheck")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("OK");
+    }
+
     @PostMapping("/issue")
     public ResponseEntity<Loan> issueLoan(@RequestBody Map<String, String> body) {
         String userId = body.get("userId");
